@@ -538,33 +538,42 @@ public class ClavierBorneArcade implements KeyListener {
 
 	case KeyEvent.VK_F:
 	case KeyEvent.VK_AMPERSAND:
+	case KeyEvent.VK_1:
 	case KeyEvent.VK_ENTER:
 	    f = false;
 	    fTape = true;
 	    break;
 
 	case KeyEvent.VK_G:
+	case KeyEvent.VK_2:
 	    g = false;
 	    gTape = true;
 	    break;
 
 	case KeyEvent.VK_H:
+	case KeyEvent.VK_3:
+	case KeyEvent.VK_QUOTEDBL:
 	    h = false;
 	    hTape = true;
 	    break;
 
 	case KeyEvent.VK_R:
+	case KeyEvent.VK_4:
 	    r = false;
 	    rTape = true;
 	    break;
 
 	case KeyEvent.VK_T:
+	case KeyEvent.VK_5:
+	case KeyEvent.VK_LEFT_PARENTHESIS:
 	    t = false;
 	    tTape = true;
 	    break;
 
 	case KeyEvent.VK_Y:
 	case KeyEvent.VK_QUOTE:
+	case KeyEvent.VK_6:
+	case KeyEvent.VK_MINUS:
 	case KeyEvent.VK_ESCAPE:
 	    y = false;
 	    yTape = true;
@@ -681,28 +690,37 @@ public class ClavierBorneArcade implements KeyListener {
 
 	case KeyEvent.VK_F:
 	case KeyEvent.VK_AMPERSAND:
+	case KeyEvent.VK_1:
 	case KeyEvent.VK_ENTER:
 	    f = true;
 	    break;
 
 	case KeyEvent.VK_G:
+	case KeyEvent.VK_2:
 	    g = true;
 	    break;
 
 	case KeyEvent.VK_H:
+	case KeyEvent.VK_3:
+	case KeyEvent.VK_QUOTEDBL:
 	    h = true;
 	    break;
 
 	case KeyEvent.VK_R:
+	case KeyEvent.VK_4:
 	    r = true;
 	    break;
 
 	case KeyEvent.VK_T:
+	case KeyEvent.VK_5:
+	case KeyEvent.VK_LEFT_PARENTHESIS:
 	    t = true;
 	    break;
 
 	case KeyEvent.VK_Y:
 	case KeyEvent.VK_QUOTE:
+	case KeyEvent.VK_6:
+	case KeyEvent.VK_MINUS:
 	case KeyEvent.VK_ESCAPE:
 	    y = true;
 	    break;

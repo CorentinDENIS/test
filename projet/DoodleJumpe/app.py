@@ -18,14 +18,37 @@ from entities import Bullet, Enemy, Platform, Player
 from helpers import clamp, make_vertical_gradient
 from storage import ensure_score_files, load_highscores, save_highscore
 
+ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+MENU_OPTIONS = ("Jouer", "Regles", "Highscores", "Quitter")
+PAUSE_OPTIONS = ("Reprendre", "Retour menu")
+RULE_LINES = (
+    "But du jeu:",
+    "- Montez le plus haut possible en sautant de plateforme en plateforme.",
+    "- Le saut est automatique quand vous retombez sur une plateforme.",
+    "",
+    "Systemes de jeu:",
+    "- Plateforme orange: super saut.",
+    "- Plateforme bleue: plateforme mouvante.",
+    "- Plateforme marron: fragile (disparait apres utilisation).",
+    "- Touche F: tir pour eliminer les ennemis.",
+    "- Si vous tombez trop bas ou touchez un ennemi: fin de partie.",
+    "",
+    "Touches borne / clavier:",
+    "- Gauche / Droite (ou Q / D): deplacement.",
+    "- F (ou Entree): valider et tirer en partie.",
+    "- T: pause pendant la partie.",
+    "- Y / Echap: retour menu.",
+)
+
 
 class DoodleJumpeApp:
     def __init__(self):
         pygame.init()
         self.display_surface = self.create_display_surface()
         self.screen = self.display_surface
+        self.display_size = self.display_surface.get_size()
         self.software_scale = False
-        if self.display_surface.get_size() != (SCREEN_W, SCREEN_H):
+        if self.display_size != (SCREEN_W, SCREEN_H):
             self.screen = pygame.Surface((SCREEN_W, SCREEN_H)).convert()
             self.software_scale = True
         pygame.display.set_caption("Doodle Jumpe - Borne Arcade")
@@ -45,6 +68,40 @@ class DoodleJumpeApp:
         self.font_big = pygame.font.SysFont("Agency FB", 46, bold=True)
         self.font = pygame.font.SysFont("Trebuchet MS", 32, bold=True)
         self.font_small = pygame.font.SysFont("Consolas", 22, bold=True)
+        self.text_cache = {}
+
+        self.panel_rect = pygame.Rect(26, 26, SCREEN_W - 52, SCREEN_H - 52)
+        self.panel_surface = pygame.Surface(self.panel_rect.size, pygame.SRCALPHA)
+        pygame.draw.rect(self.panel_surface, CARD, self.panel_surface.get_rect(), border_radius=18)
+        pygame.draw.rect(self.panel_surface, CARD_BORDER, self.panel_surface.get_rect(), 3, border_radius=18)
+
+        self.hud_surface = pygame.Surface((SCREEN_W, 90)).convert()
+        self.hud_surface.fill((255, 255, 255))
+        pygame.draw.line(self.hud_surface, CARD_BORDER, (0, 90), (SCREEN_W, 90), 2)
+        self.hud_tip_surface = self.render_cached(
+            self.font_small,
+            "Gauche/Droite ou Q/D: deplacer   F: tirer   T: pause   Y: menu",
+            TEXT_DIM,
+        )
+        self.hud_tip_pos = (SCREEN_W // 2 - self.hud_tip_surface.get_width() // 2, SCREEN_H - 34)
+
+        self.pause_overlay = pygame.Surface((SCREEN_W, SCREEN_H), pygame.SRCALPHA)
+        self.pause_overlay.fill((0, 0, 0, 150))
+        self.pause_card_rect = pygame.Rect(SCREEN_W // 2 - 196, SCREEN_H // 2 - 134, 392, 258)
+        self.pause_card_surface = pygame.Surface(self.pause_card_rect.size, pygame.SRCALPHA)
+        pygame.draw.rect(self.pause_card_surface, CARD, self.pause_card_surface.get_rect(), border_radius=14)
+        pygame.draw.rect(self.pause_card_surface, CARD_BORDER, self.pause_card_surface.get_rect(), 3, border_radius=14)
+
+        self._hud_score_value = None
+        self._hud_score_surface = None
+        self._hud_altitude_value = None
+        self._hud_altitude_surface = None
+        self._hud_enemy_count = None
+        self._hud_enemy_surface = None
+        self._hud_shoot_ready = None
+        self._hud_shoot_surface = None
+        self._status_key = None
+        self._status_surface = None
 
         self.running = True
         self.state = "menu"
@@ -81,9 +138,18 @@ class DoodleJumpeApp:
         self.clouds = self.build_clouds()
 
         ensure_score_files(HIGHSCORE_PATH)
+        self.highscores_cache = []
+        self.refresh_highscores()
         self.reset_run_state()
 
     def create_display_surface(self):
+        if hasattr(pygame, "SCALED"):
+            scaled_flags = pygame.DOUBLEBUF | pygame.FULLSCREEN | pygame.SCALED
+            try:
+                return pygame.display.set_mode((SCREEN_W, SCREEN_H), scaled_flags)
+            except pygame.error:
+                pass
+
         desktop_size = None
         if hasattr(pygame.display, "get_desktop_sizes"):
             desktop_sizes = pygame.display.get_desktop_sizes()
@@ -94,8 +160,6 @@ class DoodleJumpeApp:
             desktop_size = (max(1, info.current_w), max(1, info.current_h))
 
         fullscreen_flags = pygame.DOUBLEBUF | pygame.NOFRAME
-        if hasattr(pygame, "SCALED"):
-            fullscreen_flags |= pygame.SCALED
 
         try:
             return pygame.display.set_mode(desktop_size, fullscreen_flags)
@@ -198,6 +262,25 @@ class DoodleJumpeApp:
             (int(size * 0.52), int(size * 0.08), int(size * 0.43), int(base_h * 0.6)),
         )
         return surface
+
+    def render_cached(self, font, text, color):
+        key = (id(font), text, color)
+        surface = self.text_cache.get(key)
+        if surface is not None:
+            return surface
+
+        surface = font.render(text, True, color).convert_alpha()
+        if len(self.text_cache) > 4096:
+            self.text_cache.clear()
+        self.text_cache[key] = surface
+        return surface
+
+    def refresh_highscores(self):
+        self.highscores_cache = load_highscores(HIGHSCORE_PATH)
+
+    def open_highscores(self):
+        self.refresh_highscores()
+        self.state = "highscores"
 
     def reset_run_state(self):
         self.score = 0
@@ -375,18 +458,28 @@ class DoodleJumpeApp:
             return
 
         player_rect = self.player.get_rect()
-        feet = pygame.Rect(player_rect.x + 8, player_rect.bottom - 5, max(4, player_rect.w - 16), 10)
+        feet_left = player_rect.x + 8
+        feet_right = player_rect.right - 8
+        feet_top = player_rect.bottom - 5
+        feet_bottom = feet_top + 10
+        previous_bottom = previous_rect.bottom
 
         for platform in self.platforms:
             if not platform.active:
                 continue
-            rect = platform.get_rect()
-            if previous_rect.bottom > rect.top + 8:
+            platform_top = int(platform.y)
+            if previous_bottom > platform_top + 8:
                 continue
-            if not feet.colliderect(rect):
+            platform_bottom = platform_top + platform.height
+            if feet_bottom < platform_top or feet_top > platform_bottom:
                 continue
 
-            self.player.y = float(rect.top - self.player.height)
+            platform_left = int(platform.x)
+            platform_right = platform_left + platform.width
+            if feet_right <= platform_left or feet_left >= platform_right:
+                continue
+
+            self.player.y = float(platform_top - self.player.height)
             if platform.kind == "boost":
                 self.player.vy = SUPER_JUMP_SPEED
                 self.set_status("Super saut", PLATFORM_BOOST, 900)
@@ -412,14 +505,29 @@ class DoodleJumpeApp:
         if not self.bullets or not self.enemies:
             return
 
+        enemy_boxes = []
+        for enemy in self.enemies:
+            if not enemy.active:
+                continue
+            ex = int(enemy.x)
+            ey = int(enemy.y)
+            enemy_boxes.append((enemy, ex, ey, ex + enemy.width, ey + enemy.height))
+
+        if not enemy_boxes:
+            return
+
         for bullet in self.bullets:
             if not bullet.active:
                 continue
-            bullet_rect = bullet.get_rect()
-            for enemy in self.enemies:
+            radius = bullet.radius
+            bx1 = int(bullet.x - radius)
+            by1 = int(bullet.y - radius)
+            bx2 = bx1 + radius * 2
+            by2 = by1 + radius * 2
+            for enemy, ex1, ey1, ex2, ey2 in enemy_boxes:
                 if not enemy.active:
                     continue
-                if not bullet_rect.colliderect(enemy.get_rect()):
+                if bx2 <= ex1 or bx1 >= ex2 or by2 <= ey1 or by1 >= ey2:
                     continue
 
                 bullet.active = False
@@ -430,22 +538,30 @@ class DoodleJumpeApp:
                 break
 
     def handle_player_enemy_collision(self):
-        player_hitbox = self.player.get_rect().inflate(-16, -10)
+        px1 = int(self.player.x) + 8
+        py1 = int(self.player.y) + 5
+        px2 = px1 + self.player.width - 16
+        py2 = py1 + self.player.height - 10
         for enemy in self.enemies:
             if not enemy.active:
                 continue
-            if player_hitbox.colliderect(enemy.get_rect().inflate(-6, -6)):
-                self.begin_name_input()
-                return True
+            ex1 = int(enemy.x) + 6
+            ey1 = int(enemy.y) + 6
+            ex2 = ex1 + enemy.width - 12
+            ey2 = ey1 + enemy.height - 12
+            if px2 <= ex1 or px1 >= ex2 or py2 <= ey1 or py1 >= ey2:
+                continue
+            self.begin_name_input()
+            return True
         return False
 
     def cleanup_dynamic_objects(self):
-        self.bullets = [
+        self.bullets[:] = [
             b
             for b in self.bullets
             if b.active and -40 <= b.y <= SCREEN_H + 100 and -50 <= b.x <= SCREEN_W + 50
         ]
-        self.enemies = [e for e in self.enemies if e.active and e.y <= SCREEN_H + 120]
+        self.enemies[:] = [e for e in self.enemies if e.active and e.y <= SCREEN_H + 120]
 
     def update_gameplay(self, dt):
         dt_factor = clamp(dt * FPS, 0.55, 1.85)
@@ -507,6 +623,8 @@ class DoodleJumpeApp:
 
     def draw_platforms(self):
         for platform in self.platforms:
+            if platform.y < -40 or platform.y > SCREEN_H + 40:
+                continue
             platform.draw(
                 self.screen,
                 normal_color=PLATFORM_NORMAL,
@@ -517,39 +635,57 @@ class DoodleJumpeApp:
 
     def draw_enemies(self):
         for enemy in self.enemies:
+            if enemy.y < -80 or enemy.y > SCREEN_H + 80:
+                continue
             enemy.draw(self.screen)
 
     def draw_bullets(self):
         for bullet in self.bullets:
+            if bullet.y < -20 or bullet.y > SCREEN_H + 40:
+                continue
             bullet.draw(self.screen)
 
     def draw_hud(self):
-        hud = pygame.Rect(0, 0, SCREEN_W, 90)
-        pygame.draw.rect(self.screen, (255, 255, 255), hud)
-        pygame.draw.line(self.screen, CARD_BORDER, (0, 90), (SCREEN_W, 90), 2)
+        self.screen.blit(self.hud_surface, (0, 0))
 
-        text = self.font.render("Score {}".format(self.score), True, TEXT_MAIN)
-        self.screen.blit(text, (20, 14))
+        if self._hud_score_value != self.score:
+            self._hud_score_value = self.score
+            self._hud_score_surface = self.render_cached(self.font, "Score {}".format(self.score), TEXT_MAIN)
+        self.screen.blit(self._hud_score_surface, (20, 14))
 
         altitude = int(self.distance)
-        alt_text = self.font_small.render("Altitude {} px".format(altitude), True, TEXT_DIM)
-        self.screen.blit(alt_text, (23, 58))
+        if self._hud_altitude_value != altitude:
+            self._hud_altitude_value = altitude
+            self._hud_altitude_surface = self.render_cached(
+                self.font_small, "Altitude {} px".format(altitude), TEXT_DIM
+            )
+        self.screen.blit(self._hud_altitude_surface, (23, 58))
 
-        enemy_text = self.font_small.render("Ennemis {}".format(len(self.enemies)), True, TEXT_DIM)
-        self.screen.blit(enemy_text, (280, 58))
+        enemy_count = len(self.enemies)
+        if self._hud_enemy_count != enemy_count:
+            self._hud_enemy_count = enemy_count
+            self._hud_enemy_surface = self.render_cached(
+                self.font_small, "Ennemis {}".format(enemy_count), TEXT_DIM
+            )
+        self.screen.blit(self._hud_enemy_surface, (280, 58))
 
         shoot_ready = pygame.time.get_ticks() >= self.shoot_cooldown_until_ms
-        shoot_color = HIGHLIGHT if shoot_ready else TEXT_DIM
-        shoot_state = "Tir F: pret" if shoot_ready else "Tir F: recharge"
-        shoot_text = self.font_small.render(shoot_state, True, shoot_color)
-        self.screen.blit(shoot_text, (462, 58))
+        if self._hud_shoot_ready != shoot_ready:
+            self._hud_shoot_ready = shoot_ready
+            shoot_color = HIGHLIGHT if shoot_ready else TEXT_DIM
+            shoot_state = "Tir F: pret" if shoot_ready else "Tir F: recharge"
+            self._hud_shoot_surface = self.render_cached(self.font_small, shoot_state, shoot_color)
+        self.screen.blit(self._hud_shoot_surface, (462, 58))
 
-        tips = self.font_small.render("Gauche/Droite ou Q/D: deplacer   F: tirer   T: pause   Y: menu", True, TEXT_DIM)
-        self.screen.blit(tips, (SCREEN_W // 2 - tips.get_width() // 2, SCREEN_H - 34))
+        self.screen.blit(self.hud_tip_surface, self.hud_tip_pos)
 
-        if self.status_text and pygame.time.get_ticks() < self.status_until_ms:
-            status = self.font_small.render(self.status_text, True, self.status_color)
-            self.screen.blit(status, (SCREEN_W // 2 - status.get_width() // 2, 58))
+        now = pygame.time.get_ticks()
+        if self.status_text and now < self.status_until_ms:
+            status_key = (self.status_text, self.status_color)
+            if self._status_key != status_key:
+                self._status_key = status_key
+                self._status_surface = self.render_cached(self.font_small, self.status_text, self.status_color)
+            self.screen.blit(self._status_surface, (SCREEN_W // 2 - self._status_surface.get_width() // 2, 58))
 
     def draw_game(self):
         self.draw_background(game_mode=True)
@@ -561,76 +697,58 @@ class DoodleJumpeApp:
 
     def draw_menu(self):
         self.draw_background(game_mode=False)
+        self.screen.blit(self.panel_surface, self.panel_rect.topleft)
 
-        panel = pygame.Rect(26, 26, SCREEN_W - 52, SCREEN_H - 52)
-        pygame.draw.rect(self.screen, CARD, panel, border_radius=18)
-        pygame.draw.rect(self.screen, CARD_BORDER, panel, 3, border_radius=18)
-
-        title = self.font_title.render("DOODLE JUMPE", True, HIGHLIGHT)
+        title = self.render_cached(self.font_title, "DOODLE JUMPE", HIGHLIGHT)
         self.screen.blit(title, (SCREEN_W // 2 - title.get_width() // 2, 44))
 
-        subtitle = self.font_small.render("Version borne arcade", True, TEXT_DIM)
+        subtitle = self.render_cached(self.font_small, "Version borne arcade", TEXT_DIM)
         self.screen.blit(subtitle, (SCREEN_W // 2 - subtitle.get_width() // 2, 116))
 
         if self.cover:
             self.screen.blit(self.cover, (SCREEN_W // 2 - self.cover.get_width() // 2, 154))
 
-        options = ["Jouer", "Regles", "Highscores", "Quitter"]
-        for index, label in enumerate(options):
+        for index, label in enumerate(MENU_OPTIONS):
             color = HIGHLIGHT if self.menu_index == index else TEXT_MAIN
-            line = self.font.render(label, True, color)
+            line = self.render_cached(self.font, label, color)
             self.screen.blit(line, (SCREEN_W // 2 - line.get_width() // 2, 398 + index * 52))
 
-        tip = self.font_small.render("Haut/Bas: menu   F/Entree: valider   Y/Echap: quitter", True, TEXT_DIM)
+        tip = self.render_cached(
+            self.font_small,
+            "Haut/Bas: menu   F/Entree: valider   Y/Echap: quitter",
+            TEXT_DIM,
+        )
         self.screen.blit(tip, (SCREEN_W // 2 - tip.get_width() // 2, SCREEN_H - 56))
 
     def draw_rules(self):
         self.draw_background(game_mode=False)
+        self.screen.blit(self.panel_surface, self.panel_rect.topleft)
 
-        panel = pygame.Rect(26, 26, SCREEN_W - 52, SCREEN_H - 52)
-        pygame.draw.rect(self.screen, CARD, panel, border_radius=18)
-        pygame.draw.rect(self.screen, CARD_BORDER, panel, 3, border_radius=18)
-
-        title = self.font_big.render("REGLES", True, HIGHLIGHT)
+        title = self.render_cached(self.font_big, "REGLES", HIGHLIGHT)
         self.screen.blit(title, (SCREEN_W // 2 - title.get_width() // 2, 48))
 
-        lines = [
-            "But du jeu:",
-            "- Montez le plus haut possible en sautant de plateforme en plateforme.",
-            "- Le saut est automatique quand vous retombez sur une plateforme.",
-            "",
-            "Systemes de jeu:",
-            "- Plateforme orange: super saut.",
-            "- Plateforme bleue: plateforme mouvante.",
-            "- Plateforme marron: fragile (disparait apres utilisation).",
-            "- Touche F: tir pour eliminer les ennemis.",
-            "- Si vous tombez trop bas ou touchez un ennemi: fin de partie.",
-            "",
-            "Touches borne / clavier:",
-            "- Gauche / Droite (ou Q / D): deplacement.",
-            "- F (ou Entree): valider et tirer en partie.",
-            "- T: pause pendant la partie.",
-            "- Y / Echap: retour menu.",
-        ]
-
         y = 130
-        for line in lines:
+        for line in RULE_LINES:
             color = HIGHLIGHT if line.endswith(":") else TEXT_MAIN
-            txt = self.font_small.render(line, True, color)
+            txt = self.render_cached(self.font_small, line, color)
             self.screen.blit(txt, (64, y))
             y += 34
 
-        tip = self.font_small.render("F/Entree pour retour menu   Y/Echap pour retour menu", True, TEXT_DIM)
+        tip = self.render_cached(
+            self.font_small,
+            "F/Entree pour retour menu   Y/Echap pour retour menu",
+            TEXT_DIM,
+        )
         self.screen.blit(tip, (SCREEN_W // 2 - tip.get_width() // 2, SCREEN_H - 46))
 
     def draw_highscores(self):
         self.draw_background(game_mode=False)
-        title = self.font_big.render("HIGHSCORES", True, HIGHLIGHT)
+        title = self.render_cached(self.font_big, "HIGHSCORES", HIGHLIGHT)
         self.screen.blit(title, (SCREEN_W // 2 - title.get_width() // 2, 50))
 
-        scores = load_highscores(HIGHSCORE_PATH)
+        scores = self.highscores_cache
         if not scores:
-            text = self.font.render("Aucun score enregistre", True, TEXT_MAIN)
+            text = self.render_cached(self.font, "Aucun score enregistre", TEXT_MAIN)
             self.screen.blit(text, (SCREEN_W // 2 - text.get_width() // 2, 198))
         else:
             for i in range(MAX_SCORES):
@@ -639,45 +757,37 @@ class DoodleJumpeApp:
                     line = "{:>2}. {}  -  {}".format(i + 1, name, value)
                 else:
                     line = "{:>2}. {}  -  0".format(i + 1, "-" * NAME_LEN)
-                txt = self.font.render(line, True, TEXT_MAIN)
+                txt = self.render_cached(self.font, line, TEXT_MAIN)
                 self.screen.blit(txt, (SCREEN_W // 2 - 176, 138 + i * 42))
 
-        tip = self.font_small.render("F/Entree pour valider   Y/Echap pour retour", True, TEXT_DIM)
+        tip = self.render_cached(self.font_small, "F/Entree pour valider   Y/Echap pour retour", TEXT_DIM)
         self.screen.blit(tip, (SCREEN_W // 2 - tip.get_width() // 2, SCREEN_H - 56))
 
     def draw_pause(self):
         self.draw_game()
+        self.screen.blit(self.pause_overlay, (0, 0))
+        self.screen.blit(self.pause_card_surface, self.pause_card_rect.topleft)
 
-        overlay = pygame.Surface((SCREEN_W, SCREEN_H), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 150))
-        self.screen.blit(overlay, (0, 0))
-
-        card = pygame.Rect(SCREEN_W // 2 - 196, SCREEN_H // 2 - 134, 392, 258)
-        pygame.draw.rect(self.screen, CARD, card, border_radius=14)
-        pygame.draw.rect(self.screen, CARD_BORDER, card, 3, border_radius=14)
-
-        title = self.font_big.render("PAUSE", True, HIGHLIGHT)
+        title = self.render_cached(self.font_big, "PAUSE", HIGHLIGHT)
         self.screen.blit(title, (SCREEN_W // 2 - title.get_width() // 2, SCREEN_H // 2 - 106))
 
-        options = ["Reprendre", "Retour menu"]
-        for i, label in enumerate(options):
+        for i, label in enumerate(PAUSE_OPTIONS):
             color = HIGHLIGHT if self.pause_index == i else TEXT_MAIN
-            txt = self.font.render(label, True, color)
+            txt = self.render_cached(self.font, label, color)
             self.screen.blit(txt, (SCREEN_W // 2 - txt.get_width() // 2, SCREEN_H // 2 - 28 + i * 58))
 
     def draw_name_input(self):
         self.draw_background(game_mode=False)
 
-        title = self.font_big.render("FIN DE PARTIE", True, ALERT)
+        title = self.render_cached(self.font_big, "FIN DE PARTIE", ALERT)
         self.screen.blit(title, (SCREEN_W // 2 - title.get_width() // 2, 54))
 
-        score_text = self.font.render("Score: {}".format(self.score), True, TEXT_MAIN)
+        score_text = self.render_cached(self.font, "Score: {}".format(self.score), TEXT_MAIN)
         self.screen.blit(score_text, (SCREEN_W // 2 - score_text.get_width() // 2, 118))
 
-        sub = self.font_small.render("Entrez votre pseudo (4 lettres)", True, TEXT_MAIN)
+        sub = self.render_cached(self.font_small, "Entrez votre pseudo (4 lettres)", TEXT_MAIN)
         self.screen.blit(sub, (SCREEN_W // 2 - sub.get_width() // 2, 170))
 
-        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         box_w = 72
         box_gap = 18
         total_w = NAME_LEN * box_w + (NAME_LEN - 1) * box_gap
@@ -689,27 +799,31 @@ class DoodleJumpeApp:
             pygame.draw.rect(self.screen, fill, box, border_radius=8)
             pygame.draw.rect(self.screen, (14, 20, 44), box, 3, border_radius=8)
 
-            letter = alphabet[self.name_chars[i]]
-            txt = self.font_big.render(letter, True, (14, 20, 44))
+            letter = ALPHABET[self.name_chars[i]]
+            txt = self.render_cached(self.font_big, letter, (14, 20, 44))
             self.screen.blit(txt, (box.centerx - txt.get_width() // 2, box.y + 14))
 
-        tip = self.font_small.render("Haut/Bas: lettre | Gauche/Droite: position | F/Entree: valider", True, TEXT_MAIN)
-        tip2 = self.font_small.render("Y/Echap: ignorer et retour menu", True, TEXT_DIM)
+        tip = self.render_cached(
+            self.font_small,
+            "Haut/Bas: lettre | Gauche/Droite: position | F/Entree: valider",
+            TEXT_MAIN,
+        )
+        tip2 = self.render_cached(self.font_small, "Y/Echap: ignorer et retour menu", TEXT_DIM)
         self.screen.blit(tip, (SCREEN_W // 2 - tip.get_width() // 2, 374))
         self.screen.blit(tip2, (SCREEN_W // 2 - tip2.get_width() // 2, 404))
 
     def handle_event_menu(self, key):
         if key in KEY_UP:
-            self.menu_index = (self.menu_index - 1) % 4
+            self.menu_index = (self.menu_index - 1) % len(MENU_OPTIONS)
         elif key in KEY_DOWN:
-            self.menu_index = (self.menu_index + 1) % 4
+            self.menu_index = (self.menu_index + 1) % len(MENU_OPTIONS)
         elif key in KEY_CONFIRM:
             if self.menu_index == 0:
                 self.start_new_run()
             elif self.menu_index == 1:
                 self.state = "rules"
             elif self.menu_index == 2:
-                self.state = "highscores"
+                self.open_highscores()
             else:
                 self.running = False
         elif key in KEY_BACK_MENU:
@@ -755,7 +869,7 @@ class DoodleJumpeApp:
             self.resume_after_pause()
 
     def handle_event_name_input(self, key):
-        alphabet_len = 26
+        alphabet_len = len(ALPHABET)
         if key in KEY_LEFT:
             self.name_index = (self.name_index - 1) % NAME_LEN
         elif key in KEY_RIGHT:
@@ -765,16 +879,15 @@ class DoodleJumpeApp:
         elif key in KEY_DOWN:
             self.name_chars[self.name_index] = (self.name_chars[self.name_index] - 1) % alphabet_len
         elif key in KEY_CONFIRM:
-            alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            name = "".join(alphabet[index] for index in self.name_chars)
+            name = "".join(ALPHABET[index] for index in self.name_chars)
             save_highscore(HIGHSCORE_PATH, name, self.score)
-            self.state = "highscores"
+            self.open_highscores()
         elif key in KEY_BACK:
             self.go_to_menu()
 
     def run(self):
         while self.running:
-            dt = self.clock.tick_busy_loop(FPS) / 1000.0
+            dt = self.clock.tick(FPS) / 1000.0
             now = pygame.time.get_ticks()
 
             for event in pygame.event.get():
@@ -818,8 +931,7 @@ class DoodleJumpeApp:
                 self.draw_menu()
 
             if self.software_scale:
-                scaled = pygame.transform.smoothscale(self.screen, self.display_surface.get_size())
-                self.display_surface.blit(scaled, (0, 0))
+                pygame.transform.scale(self.screen, self.display_size, self.display_surface)
             pygame.display.flip()
 
         pygame.quit()

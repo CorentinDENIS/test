@@ -38,7 +38,8 @@ class Player:
         self.y += delta
 
     def draw(self, screen, body_color, outline_color):
-        rect = self.get_rect()
+        x = int(self.x)
+        y = int(self.y)
         sprite = self._sprite_cache.get(self.facing)
         if sprite is None:
             sprite = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
@@ -92,9 +93,9 @@ class Player:
             pygame.draw.ellipse(sprite, lighten(outline_color, 28), right_shoe)
             self._sprite_cache[self.facing] = sprite
 
-        shadow = pygame.Rect(rect.x + 10, rect.bottom - 6, rect.w - 20, 10)
+        shadow = pygame.Rect(x + 10, y + self.height - 6, self.width - 20, 10)
         pygame.draw.ellipse(screen, lighten(body_color, -95), shadow)
-        screen.blit(sprite, rect.topleft)
+        screen.blit(sprite, (x, y))
 
 
 class Platform:
@@ -140,14 +141,15 @@ class Platform:
         if not self.active:
             return
 
-        colors = {
-            "normal": normal_color,
-            "moving": moving_color,
-            "boost": boost_color,
-            "fragile": fragile_color,
-        }
-        base = colors.get(self.kind, normal_color)
-        rect = self.get_rect()
+        if self.kind == "moving":
+            base = moving_color
+        elif self.kind == "boost":
+            base = boost_color
+        elif self.kind == "fragile":
+            base = fragile_color
+        else:
+            base = normal_color
+
         key = (self.kind, self.width, base)
         sprite = self._sprite_cache.get(key)
         if sprite is None:
@@ -164,7 +166,7 @@ class Platform:
                 pygame.draw.line(sprite, (82, 48, 26), (draw_rect.x + 16, draw_rect.bottom - 3), (draw_rect.right - 16, draw_rect.y + 3), 2)
             self._sprite_cache[key] = sprite
 
-        screen.blit(sprite, (rect.x - 4, rect.y - 3))
+        screen.blit(sprite, (int(self.x) - 4, int(self.y) - 3))
 
 
 class Enemy:
@@ -221,7 +223,6 @@ class Enemy:
         if not self.active:
             return
 
-        rect = self.get_rect()
         sprite = self._sprite_cache.get(self.kind)
         if sprite is None:
             sprite = pygame.Surface((self.width + 30, self.height + 12), pygame.SRCALPHA)
@@ -288,7 +289,7 @@ class Enemy:
             pygame.draw.arc(sprite, ENEMY_OUTLINE, (self.width // 2 + 7, 26, 16, 8), 0.2, 2.9, 2)
             self._sprite_cache[self.kind] = sprite
 
-        screen.blit(sprite, (rect.x - 10, rect.y))
+        screen.blit(sprite, (int(self.x) - 10, int(self.y)))
 
 
 class Bullet:
@@ -325,4 +326,5 @@ class Bullet:
             pygame.draw.circle(sprite, BULLET_MAIN, center, self.radius)
             pygame.draw.circle(sprite, (255, 255, 255), (center[0] - 1, center[1] - 1), max(1, self.radius // 2))
             self._sprite_cache[self.radius] = sprite
-        screen.blit(sprite, (int(self.x - sprite.get_width() / 2), int(self.y - sprite.get_height() / 2)))
+        half = sprite.get_width() // 2
+        screen.blit(sprite, (int(self.x) - half, int(self.y) - half))

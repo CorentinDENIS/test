@@ -39,11 +39,12 @@ public class Pointeur {
 
 	    //System.out.println(Graphique.tableau[getValue()].getChemin());
 	    try {
-		Graphique.stopMusiqueFond();
-		Graphique.masquerMenuPourJeu();
-		String script = "./"+Graphique.tableau[getValue()].getNom()+".sh";
-		Process process = new ProcessBuilder("bash", script)
-			.inheritIO()
+			appliquerLayoutBorne();
+			Graphique.stopMusiqueFond();
+			Graphique.masquerMenuPourJeu();
+			String script = "./"+Graphique.tableau[getValue()].getNom()+".sh";
+			Process process = new ProcessBuilder("bash", script)
+				.inheritIO()
 			.start();
 		process.waitFor();		//ajouté afin d'attendre la fin de l'exécution du jeu pour reprendre le contrôle sur le menu
 		clavier.reset();
@@ -58,12 +59,21 @@ public class Pointeur {
 		}
 
 	    //System.out.println("le process sur "+Graphique.tableau[getValue()].getChemin()+" est bien lancé");
-	}
-    }
+		}
+	    }
 
-    public int getValue() {
-	return value;
-    }
+	private void appliquerLayoutBorne() {
+		try {
+			Process p = new ProcessBuilder("setxkbmap", "borne").start();
+			p.waitFor();
+		} catch (Exception e) {
+			// Fallback silencieux: les alias clavier de ClavierBorneArcade prennent le relais.
+		}
+	}
+
+	    public int getValue() {
+		return value;
+	    }
 
     public void setValue(int value) {
 	this.value = value;
