@@ -1,0 +1,1 @@
+Choix lane:Lane 1:Lane 2:Pause:Valider/Reprendre:Quitter:Interagir

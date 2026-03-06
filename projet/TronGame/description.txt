@@ -1,0 +1,7 @@
+TronGame - Version borne arcade - 2025
+
+Affrontez un autre joueur (ou l'IA) dans
+un duel de motos lumineuses.
+Evitez les murs, votre propre trace et
+celle de l'adversaire pour survivre.
+Le dernier en vie gagne la manche.

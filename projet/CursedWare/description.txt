@@ -1,0 +1,6 @@
+CursedWare - Aernouts/Verbrugghe/Linez/Khalil - 2022
+
+Jeu inspire de WarioWare.
+Enchainez les mini-jeux tres rapidement,
+respectez les consignes et visez le meilleur score.
+Mode 2 joueurs disponible.

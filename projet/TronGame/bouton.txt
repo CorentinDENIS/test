@@ -1,0 +1,1 @@
+Direction moto:Action 1:Action 2:Pause:Valider:Retour:Quitter

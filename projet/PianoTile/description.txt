@@ -1,0 +1,7 @@
+PianoTile - GUILBERT Emma - 2025
+
+Jeu de rythme musical.
+Touchez les bonnes notes au bon moment,
+en restant synchronise avec la musique.
+Plus votre precision est bonne,
+plus votre score monte.

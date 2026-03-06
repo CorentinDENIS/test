@@ -1,0 +1,6 @@
+OsuTile - Thimote Bois - 2025
+
+Jeu de rythme type piano tiles.
+Frappez les lanes au bon timing
+pour conserver votre combo et
+obtenir le meilleur score.
