@@ -550,6 +550,7 @@ public class ClavierBorneArcade implements KeyListener {
 
 	case KeyEvent.VK_F:
 	case KeyEvent.VK_AMPERSAND:
+	case KeyEvent.VK_ENTER:
 	    f = false;
 	    fTape = true;
 	    break;
@@ -576,6 +577,7 @@ public class ClavierBorneArcade implements KeyListener {
 
 	case KeyEvent.VK_Y:
 	case KeyEvent.VK_QUOTE:
+	case KeyEvent.VK_ESCAPE:
 	    y = false;
 	    yTape = true;
 	    break;
@@ -691,6 +693,7 @@ public class ClavierBorneArcade implements KeyListener {
 
 	case KeyEvent.VK_F:
 	case KeyEvent.VK_AMPERSAND:
+	case KeyEvent.VK_ENTER:
 	    f = true;
 	    break;
 
@@ -712,6 +715,7 @@ public class ClavierBorneArcade implements KeyListener {
 
 	case KeyEvent.VK_Y:
 	case KeyEvent.VK_QUOTE:
+	case KeyEvent.VK_ESCAPE:
 	    y = true;
 	    break;
 
