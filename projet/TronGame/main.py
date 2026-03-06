@@ -129,14 +129,14 @@ class TronGame:
                 if event.type == pygame.QUIT:
                     self.running = False
                 elif event.type == pygame.KEYDOWN:
-                    if event.key in (
+                    key = pygame.K_QUOTE if getattr(event, "unicode", "") == "'" else event.key
+                    if key in (
                         pygame.K_ESCAPE,
                         pygame.K_f,
                         pygame.K_AMPERSAND,
                         pygame.K_1,
                         pygame.K_y,
                         pygame.K_QUOTE,
-                        pygame.K_6,
                     ):  # Sortie
                         if self.current_state in ["game", "options", "score_screen"]:
                             self.current_state = "menu"

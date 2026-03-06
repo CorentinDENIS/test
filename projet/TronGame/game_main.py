@@ -92,7 +92,8 @@ class Game:
     def handle_event(self, event):
         """Gère les événements du jeu"""
         if event.type == pygame.KEYDOWN:
-            if event.key in (
+            key = pygame.K_QUOTE if getattr(event, "unicode", "") == "'" else event.key
+            if key in (
                 pygame.K_p,
                 pygame.K_t,
                 pygame.K_5,
@@ -103,15 +104,15 @@ class Game:
             ):
                 # Mettre en pause / reprendre
                 self.pause = not self.pause
-            elif event.key in (pygame.K_SPACE, pygame.K_RETURN, pygame.K_r, pygame.K_4, pygame.K_QUOTE) and self.game_over:
+            elif key in (pygame.K_SPACE, pygame.K_RETURN, pygame.K_r, pygame.K_4, pygame.K_QUOTE) and self.game_over:
                 # Redémarrer après game over
                 self.__init__(self.screen, self.mode, self.difficulty)
             else:
                 # Entrées des joueurs
-                self.player1.handle_input(event.key)
+                self.player1.handle_input(key)
 
                 if self.mode == "multi":  # En mode 2 joueurs
-                    self.player2.handle_input(event.key)
+                    self.player2.handle_input(key)
 
     def update(self):
         """Met à jour l'état du jeu, retourne True si game_over"""

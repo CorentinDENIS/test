@@ -132,15 +132,16 @@ def run_menu():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
-                if event.key in MENU_UP_KEYS:
+                key = pygame.K_QUOTE if getattr(event, "unicode", "") == "'" else event.key
+                if key in MENU_UP_KEYS:
                     selected_index = (selected_index - 1) % len(beatmaps)
-                elif event.key in MENU_DOWN_KEYS:
+                elif key in MENU_DOWN_KEYS:
                     selected_index = (selected_index + 1) % len(beatmaps)
-                elif event.key in MENU_SELECT_KEYS:
+                elif key in MENU_SELECT_KEYS:
                     result = play_map(beatmaps[selected_index])
                     if result == "quit":
                         running = False
-                elif event.key in MENU_BACK_KEYS:
+                elif key in MENU_BACK_KEYS:
                     running = False
 
         clock.tick(FPS)

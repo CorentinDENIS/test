@@ -109,7 +109,8 @@ class Game():
             if event.type == pygame.QUIT:
                 return False, True
             if event.type == pygame.KEYDOWN:
-                if event.key in KEY_BACK:
+                key = pygame.K_QUOTE if getattr(event, "unicode", "") == "'" else event.key
+                if key in KEY_BACK:
                     if self.perdu:
                         return True, False
                     return False, True
@@ -252,24 +253,25 @@ class Game():
                     break
                 
                 if event.type == pygame.KEYDOWN:
-                    if event.key in KEY_CONFIRM:
+                    key = pygame.K_QUOTE if getattr(event, "unicode", "") == "'" else event.key
+                    if key in KEY_CONFIRM:
                         # Valider le pseudo et enregistrer le score
                         pseudo = ''.join([alphabet[i] for i in pseudo_chars])
                         self._saveScore(pseudo)
                         input_active = False
-                    elif event.key in KEY_BACK:
+                    elif key in KEY_BACK:
                         # Annuler la saisie
                         input_active = False
-                    elif event.key in KEY_MENU_UP:
+                    elif key in KEY_MENU_UP:
                         # Lettre suivante dans l'alphabet
                         pseudo_chars[current_position] = (pseudo_chars[current_position] + 1) % len(alphabet)
-                    elif event.key in KEY_MENU_DOWN:
+                    elif key in KEY_MENU_DOWN:
                         # Lettre précédente dans l'alphabet
                         pseudo_chars[current_position] = (pseudo_chars[current_position] - 1) % len(alphabet)
-                    elif event.key == pygame.K_LEFT:
+                    elif key == pygame.K_LEFT:
                         # Position précédente
                         current_position = (current_position - 1) % 3
-                    elif event.key == pygame.K_RIGHT:
+                    elif key == pygame.K_RIGHT:
                         # Position suivante
                         current_position = (current_position + 1) % 3
             

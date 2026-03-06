@@ -25,7 +25,8 @@ public class Graphique {
 	
     private static final int TAILLEX = 1280;
     private static final int TAILLEY = 1024;
-    private static final long DELAI_FRAME_MENU_MS = 16L;
+    private static final long DELAI_FRAME_MENU_MS = 10L;
+    private static final long DELAI_ACTUALISATION_SELECTION_MS = 75L;
     private static final Fenetre f = new Fenetre("_Menu Borne D'arcade_", TAILLEX, TAILLEY);
     private static final GraphicsDevice ECRAN = recupererEcranPrincipal();
     private ClavierBorneArcade clavier;
@@ -199,44 +200,28 @@ public class Graphique {
 		Texte non = new Texte(Couleur.NOIR, "NON", font, new Point(440, 650));
 		Texte oui = new Texte(Couleur.NOIR, "OUI", font, new Point(840, 650));
 		Rectangle rectSelection = new Rectangle(Couleur.BLEU, new Point(330,590),220,120, true);
-		int frame=0;
 		boolean fermetureMenu=false;
 		int selectionSur = 0;
 		int indexAffiche = pointeur.getValue();
+		int indexEnAttente = indexAffiche;
+		long derniereNavigationMs = 0L;
 		while(true){
-			try {
-				if(frame==0){
-					if(textesAffiches[pointeur.getValue()]==true){
-						f.supprimer(tableau[pointeur.getValue()].getTexte());
-						textesAffiches[pointeur.getValue()]=false;
-					}
-				}
-				if(frame==3){
-					if(textesAffiches[pointeur.getValue()]==false){
-						f.ajouter(tableau[pointeur.getValue()].getTexte());
-						textesAffiches[pointeur.getValue()]=true;
-					}
-				}
-				if(frame==6){
-					frame=-1;
-				}
-				frame++;
-			}
-			catch (Exception e) {
-				System.err.println(e.getMessage());
-			}
-			try{
-				Thread.sleep(DELAI_FRAME_MENU_MS);
-			}catch(Exception e){}
+			long maintenantMs = System.currentTimeMillis();
 			
 			if(!fermetureMenu){
 				if(bs.selection(clavier)){
 				    int indexSelection = pointeur.getValue();
-				    if(indexSelection != indexAffiche){
-					rafraichirSelectionCourante(indexSelection);
-					indexAffiche = indexSelection;
+				    if(indexSelection != indexEnAttente){
+					indexEnAttente = indexSelection;
+					derniereNavigationMs = maintenantMs;
+				    }
+				    if(indexEnAttente != indexAffiche && (maintenantMs - derniereNavigationMs) >= DELAI_ACTUALISATION_SELECTION_MS){
+					rafraichirSelectionCourante(indexEnAttente);
+					indexAffiche = indexEnAttente;
 				    }
 				    if(pointeur.lancerJeu(clavier)){
+					indexAffiche = pointeur.getValue();
+					indexEnAttente = indexAffiche;
 					rafraichirSelectionCourante(indexAffiche);
 				    }
 				}else{
@@ -287,6 +272,9 @@ public class Graphique {
 
 			}
 			f.rafraichir();
+			try{
+				Thread.sleep(DELAI_FRAME_MENU_MS);
+			}catch(Exception e){}
 		}//fin while true
     }
 

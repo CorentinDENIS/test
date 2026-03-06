@@ -28,7 +28,7 @@ HIT_BOX_PIXEL = 30  # Tolérance
 KEY_MAPPING = {
     0: (pygame.K_r, pygame.K_4, pygame.K_a),
     1: (pygame.K_t, pygame.K_5, pygame.K_LEFTPAREN, pygame.K_z),
-    2: (pygame.K_y, pygame.K_6, pygame.K_QUOTE, pygame.K_e),
+    2: (pygame.K_y, pygame.K_QUOTE, pygame.K_e),
     3: (pygame.K_f, pygame.K_1, pygame.K_AMPERSAND, pygame.K_q),
 }
 
@@ -62,7 +62,6 @@ MENU_BACK_KEYS = (
     pygame.K_ESCAPE,
     pygame.K_y,
     pygame.K_QUOTE,
-    pygame.K_6,
 )
 
 # Contrôles pour les menus (pause, fin)
@@ -92,9 +91,8 @@ MENU_QUIT_KEYS = (
     pygame.K_ESCAPE,
     pygame.K_y,
     pygame.K_QUOTE,
-    pygame.K_6,
 )
-MENU_BACK_TO_MENU_KEYS = (pygame.K_s, pygame.K_y, pygame.K_QUOTE, pygame.K_6)
+MENU_BACK_TO_MENU_KEYS = (pygame.K_s, pygame.K_y, pygame.K_QUOTE)
 MENU_RETRY_KEYS = (pygame.K_d, pygame.K_r, pygame.K_4, pygame.K_QUOTE, pygame.K_RETURN, pygame.K_SPACE)
 
 # === Fichiers ===

@@ -35,20 +35,21 @@ class Menu():
         goTogame: bool = False
         for event in keyEvent:
             if event.type == pygame.KEYDOWN:
-                if event.key in KEY_MENU_DOWN:
+                key = pygame.K_QUOTE if getattr(event, "unicode", "") == "'" else event.key
+                if key in KEY_MENU_DOWN:
                     #pygame.mixer.Sound.play(self.sonMenu)
                     if self.selectedOption == numberOfOptions:
                         self.selectedOption = 0
                     else:
                         self.selectedOption += 1
-                if event.key in KEY_MENU_UP:
+                if key in KEY_MENU_UP:
                     #pygame.mixer.Sound.play(self.sonMenu)
                     if self.selectedOption == 0:
                         self.selectedOption = numberOfOptions
                     else:
                         self.selectedOption -= 1
 
-                if event.key in KEY_CONFIRM:
+                if key in KEY_CONFIRM:
                     #pygame.mixer.Sound.play(self.sonMenu)
                     if pause:
                         if self.selectedOption == 0:
@@ -71,7 +72,7 @@ class Menu():
                             pygame.quit()
                             exit(0)
 
-                if event.key in KEY_BACK:
+                if key in KEY_BACK:
                     pygame.quit()
                     exit(0)
 

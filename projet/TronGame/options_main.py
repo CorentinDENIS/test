@@ -95,36 +95,37 @@ class Options:
     def handle_event(self, event):
         """Gère les événements du menu des options"""
         if event.type == pygame.KEYDOWN:
+            key = pygame.K_QUOTE if getattr(event, "unicode", "") == "'" else event.key
             # Navigation verticale (changer d'option)
-            if event.key in [pygame.K_UP, pygame.K_w, pygame.K_o]:
+            if key in [pygame.K_UP, pygame.K_w, pygame.K_o]:
                 self.items[self.selected_index].selected = False
                 self.selected_index = (self.selected_index - 1) % len(self.items)
                 self.items[self.selected_index].selected = True
                 if self.sound_navigate:
                     self.sound_navigate.play()
 
-            elif event.key in [pygame.K_DOWN, pygame.K_s, pygame.K_l]:
+            elif key in [pygame.K_DOWN, pygame.K_s, pygame.K_l]:
                 self.items[self.selected_index].selected = False
                 self.selected_index = (self.selected_index + 1) % len(self.items)
                 self.items[self.selected_index].selected = True
                 if self.sound_navigate:
                     self.sound_navigate.play()
-
+	
             # Navigation horizontale (changer la valeur de l'option)
-            elif event.key in [pygame.K_LEFT, pygame.K_k, pygame.K_a]:
+            elif key in [pygame.K_LEFT, pygame.K_k, pygame.K_a]:
                 if self.items[self.selected_index].prev_option():
                     if self.sound_navigate:
                         self.sound_navigate.play()
                     self.apply_option_change()
-
-            elif event.key in [pygame.K_RIGHT, pygame.K_m, pygame.K_d]:
+	
+            elif key in [pygame.K_RIGHT, pygame.K_m, pygame.K_d]:
                 if self.items[self.selected_index].next_option():
                     if self.sound_navigate:
                         self.sound_navigate.play()
                     self.apply_option_change()
 
             # Sélection / Confirmation
-            elif event.key in [
+            elif key in [
                 pygame.K_RETURN,
                 pygame.K_KP_ENTER,
                 pygame.K_SPACE,
@@ -146,14 +147,13 @@ class Options:
                     return "menu"
                     
             # Retour au menu avec la touche F (comme Escape)
-            elif event.key in [
+            elif key in [
                 pygame.K_ESCAPE,
                 pygame.K_f,
                 pygame.K_AMPERSAND,
                 pygame.K_1,
                 pygame.K_y,
                 pygame.K_QUOTE,
-                pygame.K_6,
             ]:
                 if self.sound_select:
                     self.sound_select.play()

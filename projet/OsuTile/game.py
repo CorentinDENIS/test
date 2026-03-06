@@ -153,11 +153,12 @@ def end_screen(screen, font, score, total_notes, max_combo):
             if event.type == pygame.QUIT:
                 return "quit"
             elif event.type == pygame.KEYDOWN:
-                if event.key in MENU_RETRY_KEYS:
+                key = pygame.K_QUOTE if getattr(event, "unicode", "") == "'" else event.key
+                if key in MENU_RETRY_KEYS:
                     return "retry"
-                elif event.key in MENU_BACK_TO_MENU_KEYS:
+                elif key in MENU_BACK_TO_MENU_KEYS:
                     return "menu"
-                elif event.key in MENU_QUIT_KEYS:
+                elif key in MENU_QUIT_KEYS:
                     return "quit"
 
 
@@ -204,7 +205,8 @@ def play_map(filename):
             if event.type == pygame.QUIT:
                 return "quit"
             elif event.type == pygame.KEYDOWN:
-                if event.key in PAUSE_KEYS:
+                key = pygame.K_QUOTE if getattr(event, "unicode", "") == "'" else event.key
+                if key in PAUSE_KEYS:
                     paused = True
                     pygame.mixer.music.pause()
                     draw_pause_menu(screen, font)
@@ -213,7 +215,8 @@ def play_map(filename):
                             if pe.type == pygame.QUIT:
                                 return "quit"
                             elif pe.type == pygame.KEYDOWN:
-                                if pe.key in MENU_RESUME_KEYS:
+                                pkey = pygame.K_QUOTE if getattr(pe, "unicode", "") == "'" else pe.key
+                                if pkey in MENU_RESUME_KEYS:
                                     countdown(
                                         screen,
                                         font,
@@ -226,11 +229,11 @@ def play_map(filename):
                                     start_time = time.time() - (current_time / 1000)
                                     pygame.mixer.music.unpause()
                                     paused = False
-                                elif pe.key in MENU_QUIT_KEYS:
+                                elif pkey in MENU_QUIT_KEYS:
                                     return "menu"
                 else:
                     for lane, key_tuple in KEY_MAPPING.items():
-                        if event.key not in key_tuple:
+                        if key not in key_tuple:
                             continue
                         for tile in tiles:
                             if tile.hit:

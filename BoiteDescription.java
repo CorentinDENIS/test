@@ -3,7 +3,9 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import MG2D.geometrie.Texture;	
@@ -24,6 +26,7 @@ public class BoiteDescription extends Boite{
     private static final int MAX_DESC_CHARS_PER_LINE = 52;
     private static final int MAX_CONTROL_CHARS = 14;
     private static final int MAX_HIGHSCORE_CHARS = 30;
+    private static final String TEXTE_CONTROLE_DEFAUT = "...";
 
     private Texte[] message;
     private boolean stop;
@@ -35,6 +38,8 @@ public class BoiteDescription extends Boite{
     private String[] texteBouton;
     private Texte highscore;
     private Texte[] listeHighScore;
+    private final Map<String, List<String>> cacheDescriptions = new HashMap<String, List<String>>();
+    private final Map<String, String[]> cacheControles = new HashMap<String, String[]>();
 	
 	/*HACKED BY BENDAL*/
 	private Font font1 = null;
@@ -147,36 +152,31 @@ public class BoiteDescription extends Boite{
      * @param path Le chemin d'accès vers le dossier du jeu.
      */
     public void lireFichier(String path){
-	//System.out.println(path);
-	String fichier =path+"/description.txt";
-	List<String> lignesAffichees = new ArrayList<String>();
-
-	try{
-	    InputStream ips=new FileInputStream(fichier); 
-	    InputStreamReader ipsr=new InputStreamReader(ips);
-	    BufferedReader br=new BufferedReader(ipsr);
-	    String ligne;
-	    while ((ligne = br.readLine()) != null && lignesAffichees.size() < MAX_DESC_LINES){
-		for(String ligneDecoupee : decouperLigne(ligne, MAX_DESC_CHARS_PER_LINE)){
-		    lignesAffichees.add(ligneDecoupee);
-		    if(lignesAffichees.size() >= MAX_DESC_LINES){
-			break;
+	List<String> lignesAffichees = cacheDescriptions.get(path);
+	if(lignesAffichees == null){
+	    lignesAffichees = new ArrayList<String>();
+	    String fichier =path+"/description.txt";
+	    try{
+		InputStream ips=new FileInputStream(fichier); 
+		InputStreamReader ipsr=new InputStreamReader(ips);
+		BufferedReader br=new BufferedReader(ipsr);
+		String ligne;
+		while ((ligne = br.readLine()) != null && lignesAffichees.size() < MAX_DESC_LINES){
+		    for(String ligneDecoupee : decouperLigne(ligne, MAX_DESC_CHARS_PER_LINE)){
+			lignesAffichees.add(ligneDecoupee);
+			if(lignesAffichees.size() >= MAX_DESC_LINES){
+			    break;
+			}
 		    }
 		}
+		br.close(); 
+	    }		
+	    catch (Exception e){
+		System.err.println(e.toString());
 	    }
-	    br.close(); 
-	}		
-	catch (Exception e){
-	    System.err.println(e.toString());
+	    cacheDescriptions.put(path, new ArrayList<String>(lignesAffichees));
 	}
-
-	for(int i = 0 ; i < MAX_DESC_LINES ; i++){
-	    if(i < lignesAffichees.size()){
-		setMessage(lignesAffichees.get(i), i);
-	    }else{
-		setMessage("", i);
-	    }
-	}
+	appliquerDescription(lignesAffichees);
     }
 
 	/**
@@ -216,46 +216,64 @@ public class BoiteDescription extends Boite{
      * @param path Le chemin d'accès vers le dossier du jeu.
      */
     public void lireBouton(String path){
-	//System.out.println(path);
-	String fichier =path+"/bouton.txt";
-	File f = new File(fichier);
-	if(!f.isFile()){
-	    settJoystick("...");
-	    for(int i = 0 ; i < 6 ; i++){
-		settBouton("...", i);
-	    }
+	String[] controles = cacheControles.get(path);
+	if(controles != null){
+	    appliquerControles(controles);
 	    return;
 	}
-		
-	//lecture du fichier texte	
-	try{
-	    InputStream ips=new FileInputStream(fichier); 
-	    InputStreamReader ipsr=new InputStreamReader(ips);
-	    BufferedReader br=new BufferedReader(ipsr);
-	    String ligne;
-	    ligne = br.readLine();
-	    if(ligne == null){
-		settJoystick("...");
-		for(int i = 0 ; i < 6 ; i++){
-		    settBouton("...", i);
+
+	controles = controlesParDefaut();
+	String fichier =path+"/bouton.txt";
+	File f = new File(fichier);
+	if(f.isFile()){
+	    try{
+		InputStream ips=new FileInputStream(fichier); 
+		InputStreamReader ipsr=new InputStreamReader(ips);
+		BufferedReader br=new BufferedReader(ipsr);
+		String ligne = br.readLine();
+		br.close();
+		if(ligne != null){
+		    texteBouton = ligne.split(":");
+		    if(texteBouton.length >= 7){
+			controles = new String[7];
+			for(int i = 0 ; i < 7 ; i++){
+			    controles[i] = texteBouton[i];
+			}
+		    }
 		}
+	    }catch(Exception e){System.err.println(e);};
+	}
+
+	cacheControles.put(path, controles);
+	appliquerControles(controles);
+    }
+
+    private void appliquerDescription(List<String> lignesAffichees){
+	for(int i = 0 ; i < MAX_DESC_LINES ; i++){
+	    if(i < lignesAffichees.size()){
+		setMessage(lignesAffichees.get(i), i);
 	    }else{
-		texteBouton = ligne.split(":");
-		if(texteBouton.length >= 7){
-		    //changer le texte des boutons
-		    settJoystick(texteBouton[0]);
-		    for(int i = 0 ; i < 6 ; i++){
-			settBouton(texteBouton[i+1], i);
-		    }
-		}else{
-		    settJoystick("...");
-		    for(int i = 0 ; i < 6 ; i++){
-			settBouton("...", i);
-		    }
-		}
+		setMessage("", i);
 	    }
-	}catch(Exception e){System.err.println(e);};
-		
+	}
+    }
+
+    private String[] controlesParDefaut(){
+	String[] defaut = new String[7];
+	for(int i = 0 ; i < 7 ; i++){
+	    defaut[i] = TEXTE_CONTROLE_DEFAUT;
+	}
+	return defaut;
+    }
+
+    private void appliquerControles(String[] controles){
+	if(controles == null || controles.length < 7){
+	    controles = controlesParDefaut();
+	}
+	settJoystick(controles[0]);
+	for(int i = 0 ; i < 6 ; i++){
+	    settBouton(controles[i+1], i);
+	}
     }
 	
     public Texte[] getMessage(){

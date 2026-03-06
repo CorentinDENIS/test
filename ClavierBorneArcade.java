@@ -546,6 +546,12 @@ public class ClavierBorneArcade implements KeyListener {
     @Override
     public void keyReleased ( KeyEvent key ) {
 
+	if (key.getKeyChar() == 0x27) {
+	    y = false;
+	    yTape = true;
+	    return;
+	}
+
 	switch (key.getKeyCode()) {
 
 	case KeyEvent.VK_F:
@@ -584,7 +590,6 @@ public class ClavierBorneArcade implements KeyListener {
 
 	case KeyEvent.VK_Y:
 	case KeyEvent.VK_QUOTE:
-	case KeyEvent.VK_6:
 	case KeyEvent.VK_ESCAPE:
 	    y = false;
 	    yTape = true;
@@ -697,6 +702,11 @@ public class ClavierBorneArcade implements KeyListener {
     @Override
     public void keyPressed(KeyEvent key) {
 
+	if (key.getKeyChar() == 0x27) {
+	    y = true;
+	    return;
+	}
+
 	switch (key.getKeyCode()) {
 
 	case KeyEvent.VK_F:
@@ -730,7 +740,6 @@ public class ClavierBorneArcade implements KeyListener {
 
 	case KeyEvent.VK_Y:
 	case KeyEvent.VK_QUOTE:
-	case KeyEvent.VK_6:
 	case KeyEvent.VK_ESCAPE:
 	    y = true;
 	    break;

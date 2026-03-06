@@ -24,8 +24,8 @@ SHOOT_COOLDOWN_MS = 165
 ENEMY_W = 54
 ENEMY_H = 42
 ENEMY_SCORE = 280
-ENEMY_SPAWN_BASE = 0.03
-ENEMY_SPAWN_MAX = 0.18
+ENEMY_SPAWN_BASE = 0.05
+ENEMY_SPAWN_MAX = 0.25
 ENEMY_MOVE_SPEED_MIN = 1.2
 ENEMY_MOVE_SPEED_MAX = 3.1
 
@@ -99,12 +99,12 @@ KEY_PAUSE = {
 KEY_BACK = {
     pygame.K_y,
     pygame.K_QUOTE,
-    pygame.K_6,
+    pygame.K_4,
     pygame.K_ESCAPE,
 }
 KEY_BACK_MENU = {
     pygame.K_ESCAPE,
     pygame.K_y,
     pygame.K_QUOTE,
-    pygame.K_6,
+    pygame.K_4,
 }
