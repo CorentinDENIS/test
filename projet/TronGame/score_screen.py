@@ -90,7 +90,6 @@ class ScoreScreen:
                 pygame.K_y,
                 pygame.K_QUOTE,
                 pygame.K_6,
-                pygame.K_MINUS,
             ]:
                 # Jouer le son de sélection si disponible
                 if self.sound_select:

@@ -2,9 +2,9 @@ import pygame
 
 class Button:
     def __init__(self):
-        self._btn_j1_x = (pygame.K_r, pygame.K_4, pygame.K_QUOTE)
+        self._btn_j1_x = (pygame.K_r, pygame.K_4)
         self._btn_j1_y = (pygame.K_t, pygame.K_5, pygame.K_LEFTPAREN)
-        self._btn_j1_z = (pygame.K_y, pygame.K_6, pygame.K_MINUS)
+        self._btn_j1_z = (pygame.K_y, pygame.K_6, pygame.K_QUOTE)
         self._btn_j1_a = (pygame.K_f, pygame.K_AMPERSAND, pygame.K_1)
         self._btn_j1_b = (pygame.K_g, pygame.K_2)
         self._btn_j1_c = (pygame.K_h, pygame.K_3, pygame.K_QUOTEDBL)

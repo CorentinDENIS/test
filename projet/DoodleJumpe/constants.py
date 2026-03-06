@@ -100,7 +100,6 @@ KEY_BACK = {
     pygame.K_y,
     pygame.K_QUOTE,
     pygame.K_6,
-    pygame.K_MINUS,
     pygame.K_ESCAPE,
 }
 KEY_BACK_MENU = {
@@ -108,5 +107,4 @@ KEY_BACK_MENU = {
     pygame.K_y,
     pygame.K_QUOTE,
     pygame.K_6,
-    pygame.K_MINUS,
 }

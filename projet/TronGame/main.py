@@ -137,7 +137,6 @@ class TronGame:
                         pygame.K_y,
                         pygame.K_QUOTE,
                         pygame.K_6,
-                        pygame.K_MINUS,
                     ):  # Sortie
                         if self.current_state in ["game", "options", "score_screen"]:
                             self.current_state = "menu"

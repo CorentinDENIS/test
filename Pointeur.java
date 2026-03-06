@@ -34,7 +34,7 @@ public class Pointeur {
 	 * @param clavier L'instance du clavier de la borne d'arcade pour vérifier les entrées.
 	 */
 
-    public void lancerJeu(ClavierBorneArcade clavier){
+    public boolean lancerJeu(ClavierBorneArcade clavier){
 	if(clavier.getBoutonJ1ATape()){
 
 	    //System.out.println(Graphique.tableau[getValue()].getChemin());
@@ -58,9 +58,11 @@ public class Pointeur {
 			Graphique.restaurerMenuApresJeu(clavier);
 		}
 
-	    //System.out.println("le process sur "+Graphique.tableau[getValue()].getChemin()+" est bien lancé");
-		}
-	    }
+		    //System.out.println("le process sur "+Graphique.tableau[getValue()].getChemin()+" est bien lancé");
+			return true;
+	}
+	return false;
+    }
 
 	private void appliquerLayoutBorne() {
 		try {

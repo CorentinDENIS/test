@@ -572,7 +572,6 @@ public class ClavierBorneArcade implements KeyListener {
 	case KeyEvent.VK_Y:
 	case KeyEvent.VK_QUOTE:
 	case KeyEvent.VK_6:
-	case KeyEvent.VK_MINUS:
 	case KeyEvent.VK_ESCAPE:
 	    y = false;
 	    yTape = true;
@@ -719,7 +718,6 @@ public class ClavierBorneArcade implements KeyListener {
 	case KeyEvent.VK_Y:
 	case KeyEvent.VK_QUOTE:
 	case KeyEvent.VK_6:
-	case KeyEvent.VK_MINUS:
 	case KeyEvent.VK_ESCAPE:
 	    y = true;
 	    break;

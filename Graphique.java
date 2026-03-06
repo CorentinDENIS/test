@@ -22,9 +22,10 @@ import MG2D.Fenetre;
  */
 
 public class Graphique {
-
+	
     private static final int TAILLEX = 1280;
     private static final int TAILLEY = 1024;
+    private static final long DELAI_FRAME_MENU_MS = 16L;
     private static final Fenetre f = new Fenetre("_Menu Borne D'arcade_", TAILLEX, TAILLEY);
     private static final GraphicsDevice ECRAN = recupererEcranPrincipal();
     private ClavierBorneArcade clavier;
@@ -34,7 +35,6 @@ public class Graphique {
     public static Bouton[] tableau;
     private Pointeur pointeur;
     Font font;
-    Font fontSelect;
 	public static boolean[] textesAffiches;
 	public static Bruitage musiqueFond;
 	private static String[] tableauMusiques;
@@ -47,7 +47,6 @@ public class Graphique {
 
     public Graphique(){
     	
-	int add_variables = 0;
 	font = null;
 	try{
 	    File in = new File("fonts/PrStart.ttf");
@@ -112,8 +111,7 @@ public class Graphique {
 	bi = new BoiteImage(new Rectangle(Couleur .GRIS_FONCE, new Point(640, 512), new Point(TAILLEX, TAILLEY), true), new String(tableau[pointeur.getValue()].getChemin()));
 	//f.ajouter(bi.getRectangle());
 	bd = new BoiteDescription(new Rectangle(Couleur .GRIS, new Point(640, 0), new Point(TAILLEX, 512), true));
-	bd.lireFichier(tableau[pointeur.getValue()].getChemin());
-	bd.lireHighScore(tableau[pointeur.getValue()].getChemin());
+	rafraichirSelectionCourante(pointeur.getValue());
 	//f.ajouter(bd.getRectangle());
 
 	Texture fond = new Texture("img/fondretro3.png", new Point(0, 0), TAILLEX, TAILLEY);
@@ -204,7 +202,7 @@ public class Graphique {
 		int frame=0;
 		boolean fermetureMenu=false;
 		int selectionSur = 0;
-		Texte textePrec=tableau[pointeur.getValue()].getTexte();
+		int indexAffiche = pointeur.getValue();
 		while(true){
 			try {
 				if(frame==0){
@@ -223,48 +221,24 @@ public class Graphique {
 					frame=-1;
 				}
 				frame++;
-				// System.out.println("frame n°"+frame);
 			}
 			catch (Exception e) {
 				System.err.println(e.getMessage());
 			}
 			try{
-				Thread.sleep(50);
+				Thread.sleep(DELAI_FRAME_MENU_MS);
 			}catch(Exception e){}
 			
 			if(!fermetureMenu){
 				if(bs.selection(clavier)){
-				bi.setImage(tableau[pointeur.getValue()].getChemin());
-
-				fontSelect = null;
-				try{
-				File in = new File("fonts/PrStart.ttf");
-				fontSelect = Font.createFont(Font.TRUETYPE_FONT, in).deriveFont(48.0f);
-				}catch (Exception e) {
-				System.err.println(e.getMessage());
-				fontSelect = new Font("SansSerif", Font.PLAIN, 48);
-				}
-
-				// if(!tableau[pointeur.getValue()].getTexte().getPolice().equals(fontSelect)){
-				// tableau[pointeur.getValue()].getTexte().setPolice(fontSelect);
-				// }
-				
-				
-				
-				
-
-				tableau[pointeur.getValue()].getTexte().setPolice(font);
-
-				bd.lireFichier(tableau[pointeur.getValue()].getChemin());
-				bd.lireHighScore(tableau[pointeur.getValue()].getChemin());
-				bd.lireBouton(tableau[pointeur.getValue()].getChemin());
-				/*
-				// System.out.println(tableau[pointeur.getValue()].getChemin());
-				// bd.setMessage(tableau[pointeur.getValue()].getNom());
-				*/
-				pointeur.lancerJeu(clavier);
-				
-				
+				    int indexSelection = pointeur.getValue();
+				    if(indexSelection != indexAffiche){
+					rafraichirSelectionCourante(indexSelection);
+					indexAffiche = indexSelection;
+				    }
+				    if(pointeur.lancerJeu(clavier)){
+					rafraichirSelectionCourante(indexAffiche);
+				    }
 				}else{
 					f.ajouter(fondBlancTransparent);
 					f.ajouter(message);
@@ -315,6 +289,17 @@ public class Graphique {
 			f.rafraichir();
 		}//fin while true
     }
+
+	private void rafraichirSelectionCourante(int index){
+	    if(index < 0 || index >= tableau.length){
+		return;
+	    }
+	    String chemin = tableau[index].getChemin();
+	    bi.setImage(chemin);
+	    bd.lireFichier(chemin);
+	    bd.lireHighScore(chemin);
+	    bd.lireBouton(chemin);
+	}
     
 	/**
 	 * Sélectionne aléatoirement une musique dans le répertoire `sound/bg/`  et la joue en boucle

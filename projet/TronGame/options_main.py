@@ -154,7 +154,6 @@ class Options:
                 pygame.K_y,
                 pygame.K_QUOTE,
                 pygame.K_6,
-                pygame.K_MINUS,
             ]:
                 if self.sound_select:
                     self.sound_select.play()
