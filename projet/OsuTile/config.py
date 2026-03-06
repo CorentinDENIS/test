@@ -26,26 +26,78 @@ HIT_BOX_PIXEL = 30  # Tolérance
 # Mappage des touches de jeu par colonne
 
 KEY_MAPPING = {
-    0: (pygame.K_r, pygame.K_1, pygame.K_a),
-    1: (pygame.K_t, pygame.K_2, pygame.K_z),
-    2: (pygame.K_y, pygame.K_3, pygame.K_e),
-    3: (pygame.K_f, pygame.K_4, pygame.K_q),
+    0: (pygame.K_r, pygame.K_4, pygame.K_QUOTE, pygame.K_a),
+    1: (pygame.K_t, pygame.K_5, pygame.K_LEFTPAREN, pygame.K_z),
+    2: (pygame.K_y, pygame.K_6, pygame.K_MINUS, pygame.K_e),
+    3: (pygame.K_f, pygame.K_1, pygame.K_AMPERSAND, pygame.K_q),
 }
 
-PAUSE_KEYS = (pygame.K_f, pygame.K_AMPERSAND, pygame.K_p)
+PAUSE_KEYS = (pygame.K_f, pygame.K_AMPERSAND, pygame.K_1, pygame.K_p, pygame.K_t, pygame.K_5, pygame.K_LEFTPAREN)
 
 # Contrôles de navigation dans les menus
 MENU_UP_KEYS = (pygame.K_UP, pygame.K_o, pygame.K_w)
 MENU_DOWN_KEYS = (pygame.K_DOWN, pygame.K_l, pygame.K_s)
-MENU_SELECT_KEYS = (pygame.K_g, pygame.K_h, pygame.K_RETURN, pygame.K_r, pygame.K_SPACE)
-MENU_BACK_KEYS = (pygame.K_h, pygame.K_f, pygame.K_AMPERSAND, pygame.K_ESCAPE, pygame.K_y, pygame.K_QUOTE)
+MENU_SELECT_KEYS = (
+    pygame.K_g,
+    pygame.K_2,
+    pygame.K_h,
+    pygame.K_3,
+    pygame.K_QUOTEDBL,
+    pygame.K_RETURN,
+    pygame.K_r,
+    pygame.K_4,
+    pygame.K_QUOTE,
+    pygame.K_f,
+    pygame.K_1,
+    pygame.K_AMPERSAND,
+    pygame.K_SPACE,
+)
+MENU_BACK_KEYS = (
+    pygame.K_h,
+    pygame.K_3,
+    pygame.K_QUOTEDBL,
+    pygame.K_f,
+    pygame.K_AMPERSAND,
+    pygame.K_1,
+    pygame.K_ESCAPE,
+    pygame.K_y,
+    pygame.K_QUOTE,
+    pygame.K_6,
+    pygame.K_MINUS,
+)
 
 # Contrôles pour les menus (pause, fin)
 
-MENU_RESUME_KEYS = (pygame.K_g, pygame.K_h, pygame.K_RETURN, pygame.K_r, pygame.K_SPACE)
-MENU_QUIT_KEYS = (pygame.K_h, pygame.K_f, pygame.K_AMPERSAND, pygame.K_ESCAPE)
-MENU_BACK_TO_MENU_KEYS = (pygame.K_s, pygame.K_y, pygame.K_QUOTE)
-MENU_RETRY_KEYS = (pygame.K_d, pygame.K_r, pygame.K_RETURN)
+MENU_RESUME_KEYS = (
+    pygame.K_g,
+    pygame.K_2,
+    pygame.K_h,
+    pygame.K_3,
+    pygame.K_QUOTEDBL,
+    pygame.K_RETURN,
+    pygame.K_r,
+    pygame.K_4,
+    pygame.K_QUOTE,
+    pygame.K_f,
+    pygame.K_1,
+    pygame.K_AMPERSAND,
+    pygame.K_SPACE,
+)
+MENU_QUIT_KEYS = (
+    pygame.K_h,
+    pygame.K_3,
+    pygame.K_QUOTEDBL,
+    pygame.K_f,
+    pygame.K_AMPERSAND,
+    pygame.K_1,
+    pygame.K_ESCAPE,
+    pygame.K_y,
+    pygame.K_QUOTE,
+    pygame.K_6,
+    pygame.K_MINUS,
+)
+MENU_BACK_TO_MENU_KEYS = (pygame.K_s, pygame.K_y, pygame.K_QUOTE, pygame.K_6, pygame.K_MINUS)
+MENU_RETRY_KEYS = (pygame.K_d, pygame.K_r, pygame.K_4, pygame.K_QUOTE, pygame.K_RETURN, pygame.K_SPACE)
 
 # === Fichiers ===
 BEATMAP_FOLDER = "beatmaps"

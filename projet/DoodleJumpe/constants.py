@@ -77,8 +77,36 @@ KEY_UP = {pygame.K_UP, pygame.K_z, pygame.K_o}
 KEY_DOWN = {pygame.K_DOWN, pygame.K_s, pygame.K_l}
 KEY_LEFT = {pygame.K_LEFT, pygame.K_q, pygame.K_k}
 KEY_RIGHT = {pygame.K_RIGHT, pygame.K_d, pygame.K_m}
-KEY_CONFIRM = {pygame.K_f, pygame.K_AMPERSAND, pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE}
-KEY_SHOOT = {pygame.K_f, pygame.K_AMPERSAND}
-KEY_PAUSE = {pygame.K_p, pygame.K_t}
-KEY_BACK = {pygame.K_y, pygame.K_QUOTE, pygame.K_ESCAPE}
-KEY_BACK_MENU = {pygame.K_ESCAPE, pygame.K_y, pygame.K_QUOTE}
+KEY_CONFIRM = {
+    pygame.K_f,
+    pygame.K_AMPERSAND,
+    pygame.K_1,
+    pygame.K_RETURN,
+    pygame.K_KP_ENTER,
+    pygame.K_SPACE,
+}
+KEY_SHOOT = {
+    pygame.K_f,
+    pygame.K_AMPERSAND,
+    pygame.K_1,
+}
+KEY_PAUSE = {
+    pygame.K_p,
+    pygame.K_t,
+    pygame.K_5,
+    pygame.K_LEFTPAREN,
+}
+KEY_BACK = {
+    pygame.K_y,
+    pygame.K_QUOTE,
+    pygame.K_6,
+    pygame.K_MINUS,
+    pygame.K_ESCAPE,
+}
+KEY_BACK_MENU = {
+    pygame.K_ESCAPE,
+    pygame.K_y,
+    pygame.K_QUOTE,
+    pygame.K_6,
+    pygame.K_MINUS,
+}

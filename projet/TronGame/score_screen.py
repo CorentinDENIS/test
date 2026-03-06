@@ -64,12 +64,34 @@ class ScoreScreen:
     def handle_event(self, event):
         """Gère les événements de l'écran de score"""
         if event.type == pygame.KEYDOWN:
-            if event.key in [pygame.K_SPACE, pygame.K_RETURN, pygame.K_r]:
+            if event.key in [
+                pygame.K_SPACE,
+                pygame.K_RETURN,
+                pygame.K_KP_ENTER,
+                pygame.K_r,
+                pygame.K_4,
+                pygame.K_QUOTE,
+                pygame.K_h,
+                pygame.K_3,
+                pygame.K_QUOTEDBL,
+                pygame.K_f,
+                pygame.K_AMPERSAND,
+                pygame.K_1,
+            ]:
                 # Jouer le son de sélection si disponible
                 if self.sound_select:
                     self.sound_select.play()
                 return "replay"  # Signal pour rejouer
-            elif event.key in [pygame.K_ESCAPE, pygame.K_f, pygame.K_AMPERSAND, pygame.K_y, pygame.K_QUOTE]:
+            elif event.key in [
+                pygame.K_ESCAPE,
+                pygame.K_f,
+                pygame.K_AMPERSAND,
+                pygame.K_1,
+                pygame.K_y,
+                pygame.K_QUOTE,
+                pygame.K_6,
+                pygame.K_MINUS,
+            ]:
                 # Jouer le son de sélection si disponible
                 if self.sound_select:
                     self.sound_select.play()

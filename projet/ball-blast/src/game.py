@@ -1,7 +1,23 @@
 from ball import Ball
 from bullet import Bullet
 from player import Player
-from constantes import WHITE, BLACK, RED, GREEN, BLUE, SCREEN_WIDTH, SCREEN_HEIGHT, FONT, FIRERATE, BALL_EQUIVALENT, FONT_SCORE
+from constantes import (
+    WHITE,
+    BLACK,
+    RED,
+    GREEN,
+    BLUE,
+    SCREEN_WIDTH,
+    SCREEN_HEIGHT,
+    FONT,
+    FIRERATE,
+    BALL_EQUIVALENT,
+    FONT_SCORE,
+    KEY_BACK,
+    KEY_CONFIRM,
+    KEY_MENU_DOWN,
+    KEY_MENU_UP,
+)
 
 import pygame
 import random
@@ -34,6 +50,17 @@ class Game():
         self.shootCD: int = 0
         self.path: str = "./assets/explosion_frames/frame-"
         self.perdu = False
+        self._score_box = pygame.Surface((150, 50), pygame.SRCALPHA)
+        pygame.draw.rect(self._score_box, (255, 255, 255, 180), self._score_box.get_rect())
+        self._score_text = None
+        self._score_value_cached = -1
+        self._explosion_frames = []
+        for i in range(1, 18):
+            frame_name = f"{self.path}{i:02d}.png"
+            try:
+                self._explosion_frames.append(pygame.image.load(frame_name).convert_alpha())
+            except pygame.error:
+                self._explosion_frames.append(None)
 
         # Initialize player, balls, and bullets
         self.player = Player()
@@ -82,7 +109,7 @@ class Game():
             if event.type == pygame.QUIT:
                 return False, True
             if event.type == pygame.KEYDOWN:
-                if event.key in (pygame.K_f, pygame.K_AMPERSAND, pygame.K_y, pygame.K_QUOTE, pygame.K_ESCAPE, pygame.K_q):
+                if event.key in KEY_BACK:
                     if self.perdu:
                         return True, False
                     return False, True
@@ -150,11 +177,13 @@ class Game():
         self.all_sprites.draw(self.screen)
 
         # On affiche le score
-        self.score_box = pygame.Surface((150, 50), pygame.SRCALPHA)
-        pygame.draw.rect(self.score_box, (255, 255, 255, 180), self.score_box.get_rect())
-        self.score_texte = FONT_SCORE.render("Score : " + str(self.player.score), True, (0, 0, 0))
-        self.score_box.blit(self.score_texte, (10, 10))
-        self.screen.blit(self.score_box, (10, 10))
+        if self.player.score != self._score_value_cached:
+            self._score_value_cached = self.player.score
+            self._score_text = FONT_SCORE.render("Score : " + str(self.player.score), True, (0, 0, 0))
+        score_box = self._score_box.copy()
+        if self._score_text is not None:
+            score_box.blit(self._score_text, (10, 10))
+        self.screen.blit(score_box, (10, 10))
 
         hitPlayer = pygame.sprite.groupcollide(
             self.balls, self.playerGroup, False, False)
@@ -175,14 +204,11 @@ class Game():
 
             if self.frameNumberLoseAnim < 17:
                 self.frameNumberLoseAnim += 1
-                if self.frameNumberLoseAnim <= 9:
-                    deathImage = pygame.image.load(
-                        self.path + "0" + str(self.frameNumberLoseAnim) + ".png")
-                else:
-                    deathImage = pygame.image.load(
-                        self.path + str(self.frameNumberLoseAnim) + ".png")
-                self.screen.blit(deathImage, (self.player.rect.left -
-                                              20, self.player.rect.top-80))
+                frame_index = self.frameNumberLoseAnim - 1
+                if 0 <= frame_index < len(self._explosion_frames):
+                    deathImage = self._explosion_frames[frame_index]
+                    if deathImage is not None:
+                        self.screen.blit(deathImage, (self.player.rect.left - 20, self.player.rect.top - 80))
 
         # Si il n'y a plus aucune balle, il gagne
         if len(self.balls.sprites()) == 0 and not self.perdu:
@@ -211,6 +237,7 @@ class Game():
         input_active = True
         cursor_visible = True
         cursor_timer = 0
+        clock = pygame.time.Clock()
         
         while input_active:
             cursor_timer += 1
@@ -225,18 +252,18 @@ class Game():
                     break
                 
                 if event.type == pygame.KEYDOWN:
-                    if event.key in (pygame.K_r, pygame.K_RETURN, pygame.K_SPACE):
+                    if event.key in KEY_CONFIRM:
                         # Valider le pseudo et enregistrer le score
                         pseudo = ''.join([alphabet[i] for i in pseudo_chars])
                         self._saveScore(pseudo)
                         input_active = False
-                    elif event.key in (pygame.K_f, pygame.K_AMPERSAND, pygame.K_y, pygame.K_QUOTE, pygame.K_ESCAPE, pygame.K_q):
+                    elif event.key in KEY_BACK:
                         # Annuler la saisie
                         input_active = False
-                    elif event.key == pygame.K_UP:
+                    elif event.key in KEY_MENU_UP:
                         # Lettre suivante dans l'alphabet
                         pseudo_chars[current_position] = (pseudo_chars[current_position] + 1) % len(alphabet)
-                    elif event.key == pygame.K_DOWN:
+                    elif event.key in KEY_MENU_DOWN:
                         # Lettre précédente dans l'alphabet
                         pseudo_chars[current_position] = (pseudo_chars[current_position] - 1) % len(alphabet)
                     elif event.key == pygame.K_LEFT:
@@ -311,7 +338,7 @@ class Game():
                 self.screen.blit(control_surface, control_rect)
             
             pygame.display.flip()
-            pygame.time.Clock().tick(40)
+            clock.tick(40)
         
         return False,False
     

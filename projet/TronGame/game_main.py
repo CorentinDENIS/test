@@ -32,7 +32,11 @@ class Game:
             pygame.K_UP: Direction.UP,
             pygame.K_DOWN: Direction.DOWN,
             pygame.K_LEFT: Direction.LEFT,
-            pygame.K_RIGHT: Direction.RIGHT
+            pygame.K_RIGHT: Direction.RIGHT,
+            pygame.K_z: Direction.UP,
+            pygame.K_s: Direction.DOWN,
+            pygame.K_q: Direction.LEFT,
+            pygame.K_d: Direction.RIGHT,
         }
 
         player2_controls = {
@@ -88,10 +92,18 @@ class Game:
     def handle_event(self, event):
         """Gère les événements du jeu"""
         if event.type == pygame.KEYDOWN:
-            if event.key in (pygame.K_p, pygame.K_f, pygame.K_AMPERSAND):
+            if event.key in (
+                pygame.K_p,
+                pygame.K_t,
+                pygame.K_5,
+                pygame.K_LEFTPAREN,
+                pygame.K_f,
+                pygame.K_AMPERSAND,
+                pygame.K_1,
+            ):
                 # Mettre en pause / reprendre
                 self.pause = not self.pause
-            elif (event.key == pygame.K_SPACE or event.key == pygame.K_r) and self.game_over:
+            elif event.key in (pygame.K_SPACE, pygame.K_RETURN, pygame.K_r, pygame.K_4, pygame.K_QUOTE) and self.game_over:
                 # Redémarrer après game over
                 self.__init__(self.screen, self.mode, self.difficulty)
             else:

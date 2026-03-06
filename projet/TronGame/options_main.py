@@ -111,20 +111,33 @@ class Options:
                     self.sound_navigate.play()
 
             # Navigation horizontale (changer la valeur de l'option)
-            elif event.key == pygame.K_LEFT:
+            elif event.key in [pygame.K_LEFT, pygame.K_k, pygame.K_a]:
                 if self.items[self.selected_index].prev_option():
                     if self.sound_navigate:
                         self.sound_navigate.play()
                     self.apply_option_change()
 
-            elif event.key == pygame.K_RIGHT:
+            elif event.key in [pygame.K_RIGHT, pygame.K_m, pygame.K_d]:
                 if self.items[self.selected_index].next_option():
                     if self.sound_navigate:
                         self.sound_navigate.play()
                     self.apply_option_change()
 
             # Sélection / Confirmation
-            elif event.key in [pygame.K_RETURN, pygame.K_SPACE, pygame.K_r, pygame.K_h]:
+            elif event.key in [
+                pygame.K_RETURN,
+                pygame.K_KP_ENTER,
+                pygame.K_SPACE,
+                pygame.K_r,
+                pygame.K_4,
+                pygame.K_QUOTE,
+                pygame.K_h,
+                pygame.K_3,
+                pygame.K_QUOTEDBL,
+                pygame.K_f,
+                pygame.K_AMPERSAND,
+                pygame.K_1,
+            ]:
                 if self.sound_select:
                     self.sound_select.play()
 
@@ -133,7 +146,16 @@ class Options:
                     return "menu"
                     
             # Retour au menu avec la touche F (comme Escape)
-            elif event.key in [pygame.K_ESCAPE, pygame.K_f, pygame.K_AMPERSAND, pygame.K_y, pygame.K_QUOTE]:
+            elif event.key in [
+                pygame.K_ESCAPE,
+                pygame.K_f,
+                pygame.K_AMPERSAND,
+                pygame.K_1,
+                pygame.K_y,
+                pygame.K_QUOTE,
+                pygame.K_6,
+                pygame.K_MINUS,
+            ]:
                 if self.sound_select:
                     self.sound_select.play()
                 return "menu"

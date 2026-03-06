@@ -81,7 +81,20 @@ class Menu:
                 if self.sound_navigate:
                     self.sound_navigate.play()
 
-            elif event.key in [pygame.K_RETURN, pygame.K_SPACE, pygame.K_r, pygame.K_h]:
+            elif event.key in [
+                pygame.K_RETURN,
+                pygame.K_KP_ENTER,
+                pygame.K_SPACE,
+                pygame.K_r,
+                pygame.K_4,
+                pygame.K_QUOTE,
+                pygame.K_h,
+                pygame.K_3,
+                pygame.K_QUOTEDBL,
+                pygame.K_f,
+                pygame.K_AMPERSAND,
+                pygame.K_1,
+            ]:
                 if self.sound_select:
                     self.sound_select.play()
                 return self.items[self.selected_index].action

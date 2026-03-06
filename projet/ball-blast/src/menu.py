@@ -1,6 +1,19 @@
 import pygame
 
-from constantes import WHITE, BLACK, RED, GREEN, BLUE, SCREEN_WIDTH, SCREEN_HEIGHT, FONT
+from constantes import (
+    WHITE,
+    BLACK,
+    RED,
+    GREEN,
+    BLUE,
+    SCREEN_WIDTH,
+    SCREEN_HEIGHT,
+    FONT,
+    KEY_BACK,
+    KEY_CONFIRM,
+    KEY_MENU_DOWN,
+    KEY_MENU_UP,
+)
 
 
 class Menu():
@@ -22,20 +35,20 @@ class Menu():
         goTogame: bool = False
         for event in keyEvent:
             if event.type == pygame.KEYDOWN:
-                if event.key in (pygame.K_DOWN, pygame.K_s):
+                if event.key in KEY_MENU_DOWN:
                     #pygame.mixer.Sound.play(self.sonMenu)
                     if self.selectedOption == numberOfOptions:
                         self.selectedOption = 0
                     else:
                         self.selectedOption += 1
-                if event.key in (pygame.K_UP, pygame.K_z):
+                if event.key in KEY_MENU_UP:
                     #pygame.mixer.Sound.play(self.sonMenu)
                     if self.selectedOption == 0:
                         self.selectedOption = numberOfOptions
                     else:
                         self.selectedOption -= 1
 
-                if event.key in (pygame.K_r, pygame.K_RETURN, pygame.K_SPACE):
+                if event.key in KEY_CONFIRM:
                     #pygame.mixer.Sound.play(self.sonMenu)
                     if pause:
                         if self.selectedOption == 0:
@@ -58,7 +71,7 @@ class Menu():
                             pygame.quit()
                             exit(0)
 
-                if event.key in (pygame.K_q, pygame.K_ESCAPE, pygame.K_f, pygame.K_AMPERSAND, pygame.K_y, pygame.K_QUOTE):
+                if event.key in KEY_BACK:
                     pygame.quit()
                     exit(0)
 
@@ -123,13 +136,9 @@ class Menu():
         back_rect = back_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 150))
         self.screen.blit(back_text, back_rect)
         
-        if (pygame.key.get_pressed()[pygame.K_q]
-            or pygame.key.get_pressed()[pygame.K_ESCAPE]
-            or pygame.key.get_pressed()[pygame.K_f]
-            or pygame.key.get_pressed()[pygame.K_AMPERSAND]
-            or pygame.key.get_pressed()[pygame.K_y]
-            or pygame.key.get_pressed()[pygame.K_QUOTE]
-            or pygame.key.get_pressed()[pygame.K_RETURN]):
+        keys = pygame.key.get_pressed()
+        if (any(keys[k] for k in KEY_BACK)
+            or any(keys[k] for k in KEY_CONFIRM)):
             return False
         
         return True

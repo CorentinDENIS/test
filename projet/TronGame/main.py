@@ -57,6 +57,12 @@ def _save_highscore(path, name, score, limit=10):
 # Initialisation de Pygame
 pygame.init()
 pygame.mixer.init()  # Pour les effets sonores et musiques
+pygame.mouse.set_visible(False)
+try:
+    pygame.event.set_grab(True)
+except pygame.error:
+    pass
+pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
 
 class TronGame:
     def __init__(self):
@@ -123,7 +129,16 @@ class TronGame:
                 if event.type == pygame.QUIT:
                     self.running = False
                 elif event.type == pygame.KEYDOWN:
-                    if event.key in (pygame.K_ESCAPE, pygame.K_f, pygame.K_AMPERSAND, pygame.K_y, pygame.K_QUOTE):  # Sortie
+                    if event.key in (
+                        pygame.K_ESCAPE,
+                        pygame.K_f,
+                        pygame.K_AMPERSAND,
+                        pygame.K_1,
+                        pygame.K_y,
+                        pygame.K_QUOTE,
+                        pygame.K_6,
+                        pygame.K_MINUS,
+                    ):  # Sortie
                         if self.current_state in ["game", "options", "score_screen"]:
                             self.current_state = "menu"
                             self.play_music("./assets/sounds/music_menu.wav")
